@@ -1,6 +1,5 @@
-const path = require('path');
 const pool = require('../config/database');
-
+const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const createServiceRequestsTable = async () => {
@@ -52,4 +51,3 @@ const createServiceRequestsTable = async () => {
 };
 
 createServiceRequestsTable();
-

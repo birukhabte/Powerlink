@@ -9,9 +9,9 @@ async function createAdmin() {
 
         // Admin credentials - CHANGE THESE!
         const adminData = {
-            email: 'admin@powerlink.et',
+            email: 'admin@powrlink',
             username: 'admin',
-            password: 'Admin@PowerLink2025', // ⚠️ CHANGE THIS PASSWORD!
+            password: '12345678', // ⚠️ CHANGE THIS PASSWORD!
             firstName: 'System',
             lastName: 'Administrator',
             role: 'admin'

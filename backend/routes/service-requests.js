@@ -17,6 +17,7 @@ router.get('/', async (req, res) => {
         woreda,
         kebele,
         full_address,
+        documents,
         status,
         priority,
         assigned_to,
@@ -49,9 +50,9 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching service requests:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch service requests' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch service requests'
     });
   }
 });
@@ -70,6 +71,7 @@ router.get('/pending', async (req, res) => {
         woreda,
         kebele,
         full_address,
+        documents,
         status,
         priority,
         created_at
@@ -91,9 +93,9 @@ router.get('/pending', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching pending requests:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch pending requests' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch pending requests'
     });
   }
 });
@@ -108,9 +110,9 @@ router.get('/:id', async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Service request not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'Service request not found'
       });
     }
 
@@ -120,9 +122,59 @@ router.get('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching service request:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch service request' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch service request'
+    });
+  }
+});
+
+// Get service requests by user ID
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    console.log('=== BACKEND: Fetching tickets for user ===');
+    console.log('User ID:', userId);
+
+    const result = await pool.query(`
+      SELECT 
+        sr.id,
+        sr.ticket_id,
+        sr.service_type,
+        sr.full_name,
+        sr.phone,
+        sr.city,
+        sr.woreda,
+        sr.kebele,
+        sr.full_address,
+        sr.documents,
+        sr.status,
+        sr.priority,
+        sr.assigned_to,
+        sr.supervisor_notes,
+        sr.created_at,
+        sr.updated_at,
+        CONCAT(u.first_name, ' ', u.last_name) as assigned_to_username
+      FROM service_requests sr
+      LEFT JOIN users u ON sr.assigned_to = u.id
+      WHERE sr.created_by = $1
+      ORDER BY sr.created_at DESC
+    `, [userId]);
+
+    console.log('Query result:', result.rows.length, 'tickets found');
+    console.log('Tickets:', result.rows);
+
+    res.json({
+      success: true,
+      tickets: result.rows,
+      count: result.rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching user tickets:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user tickets'
     });
   }
 });
@@ -130,22 +182,40 @@ router.get('/:id', async (req, res) => {
 // Create new service request
 router.post('/', async (req, res) => {
   try {
+    // Support both camelCase (from frontend) and snake_case
     const {
       ticket_id,
+      ticketId,
       service_type,
+      serviceType,
       full_name,
+      fullName,
       phone,
       city,
       woreda,
       kebele,
       house_plot_number,
+      housePlotNumber,
       nearby_landmark,
+      nearbyLandmark,
       full_address,
-      created_by
+      fullAddress,
+      documents,
+      created_by,
+      createdBy
     } = req.body;
 
+    // Use camelCase values if available, otherwise use snake_case
+    const ticketIdValue = ticketId || ticket_id;
+    const serviceTypeValue = serviceType || service_type;
+    const fullNameValue = fullName || full_name;
+    const housePlotNumberValue = housePlotNumber || house_plot_number;
+    const nearbyLandmarkValue = nearbyLandmark || nearby_landmark;
+    const fullAddressValue = fullAddress || full_address;
+    const createdByValue = createdBy || created_by;
+
     // Validate required fields
-    if (!ticket_id || !service_type || !full_name || !phone || !full_address) {
+    if (!ticketIdValue || !serviceTypeValue || !fullNameValue || !phone || !fullAddressValue) {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields'
@@ -164,23 +234,25 @@ router.post('/', async (req, res) => {
         house_plot_number,
         nearby_landmark,
         full_address,
+        documents,
         created_by,
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending')
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending')
       RETURNING *
     `, [
-      ticket_id,
-      service_type,
-      full_name,
+      ticketIdValue,
+      serviceTypeValue,
+      fullNameValue,
       phone,
       city,
       woreda,
       kebele,
-      house_plot_number,
-      nearby_landmark,
-      full_address,
-      created_by
+      housePlotNumberValue,
+      nearbyLandmarkValue,
+      fullAddressValue,
+      JSON.stringify(documents || []),
+      createdByValue
     ]);
 
     res.status(201).json({
