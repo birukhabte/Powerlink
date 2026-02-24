@@ -6,18 +6,38 @@ const pool = require('../config/database');
 const router = express.Router();
 
 // Register endpoint
+// Register endpoint
 router.post('/register', async (req, res) => {
   try {
-    const { email, username, password, firstName, lastName, userType } = req.body;
+    const { email, username, password, firstName, lastName, userType, bpNumber } = req.body;
 
-    // Check if user already exists
-    const userExists = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR username = $2',
-      [email, username]
-    );
+    // Determine unique checks
+    const conditions = [];
+    const values = [];
+    let paramCount = 1;
 
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ error: 'User already exists' });
+    if (email) {
+      conditions.push(`email = $${paramCount++}`);
+      values.push(email);
+    }
+    if (username) {
+      conditions.push(`username = $${paramCount++}`);
+      values.push(username);
+    }
+    if (bpNumber) {
+      conditions.push(`bp_number = $${paramCount++}`);
+      values.push(bpNumber);
+    }
+
+    if (conditions.length > 0) {
+      const userExists = await pool.query(
+        `SELECT * FROM users WHERE ${conditions.join(' OR ')}`,
+        values
+      );
+
+      if (userExists.rows.length > 0) {
+        return res.status(400).json({ error: 'User already exists' });
+      }
     }
 
     // Hash password
@@ -27,10 +47,11 @@ router.post('/register', async (req, res) => {
     // Determine role - default to 'customer' if not specified
     const role = userType || 'customer';
 
-    // Insert new user with role
+    // Insert new user
+    // We need to handle optional email and bpNumber in the INSERT
     const newUser = await pool.query(
-      'INSERT INTO users (email, username, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, username, first_name, last_name, role',
-      [email, username, passwordHash, firstName, lastName, role]
+      'INSERT INTO users (email, username, password_hash, first_name, last_name, role, bp_number) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email, username, first_name, last_name, role, bp_number',
+      [email || null, username, passwordHash, firstName, lastName, role, bpNumber || null]
     );
 
     res.status(201).json({
@@ -47,11 +68,11 @@ router.post('/register', async (req, res) => {
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body; // 'email' field holds the identifier (email/BP/username)
 
-    // Find user
+    // Find user by email, bp_number, or username
     const user = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
+      'SELECT * FROM users WHERE email = $1 OR bp_number = $1 OR username = $1',
       [email]
     );
 
