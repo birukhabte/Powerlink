@@ -1,5 +1,5 @@
 const express = require('express');
-const pool = require('../config/database');
+const pool = require('../config/supabase-db');
 
 const router = express.Router();
 
@@ -13,8 +13,9 @@ router.get('/', async (req, res) => {
         username, 
         first_name, 
         last_name, 
+        role,
         is_active, 
-        is_verified, 
+        email_verified, 
         created_at, 
         updated_at
       FROM users 
@@ -27,9 +28,9 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch users' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch users'
     });
   }
 });
@@ -38,7 +39,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const result = await pool.query(`
       SELECT 
         id, 
@@ -46,8 +47,9 @@ router.get('/:id', async (req, res) => {
         username, 
         first_name, 
         last_name, 
+        role,
         is_active, 
-        is_verified, 
+        email_verified, 
         created_at, 
         updated_at
       FROM users 
@@ -55,9 +57,9 @@ router.get('/:id', async (req, res) => {
     `, [id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
       });
     }
 
@@ -67,9 +69,9 @@ router.get('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch user' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user'
     });
   }
 });
@@ -78,7 +80,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, username, first_name, last_name, is_active, is_verified } = req.body;
+    const { email, username, first_name, last_name, is_active, email_verified } = req.body;
 
     const result = await pool.query(`
       UPDATE users 
@@ -88,16 +90,16 @@ router.put('/:id', async (req, res) => {
         first_name = COALESCE($3, first_name),
         last_name = COALESCE($4, last_name),
         is_active = COALESCE($5, is_active),
-        is_verified = COALESCE($6, is_verified),
+        email_verified = COALESCE($6, email_verified),
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $7
-      RETURNING id, email, username, first_name, last_name, is_active, is_verified, created_at, updated_at
-    `, [email, username, first_name, last_name, is_active, is_verified, id]);
+      RETURNING id, email, username, first_name, last_name, is_active, email_verified, created_at, updated_at
+    `, [email, username, first_name, last_name, is_active, email_verified, id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
       });
     }
 
@@ -108,9 +110,9 @@ router.put('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating user:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to update user' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update user'
     });
   }
 });
@@ -126,9 +128,9 @@ router.delete('/:id', async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
       });
     }
 
@@ -138,9 +140,9 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting user:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to delete user' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete user'
     });
   }
 });
@@ -154,9 +156,9 @@ router.patch('/:id/role', async (req, res) => {
     // Validate role
     const validRoles = ['customer', 'special', 'technician', 'supervisor', 'admin'];
     if (!validRoles.includes(role)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid role specified' 
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid role specified'
       });
     }
 
@@ -166,13 +168,13 @@ router.patch('/:id/role', async (req, res) => {
         role = $1,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $2
-      RETURNING id, email, username, first_name, last_name, is_active, is_verified, role, created_at, updated_at
+      RETURNING id, email, username, first_name, last_name, is_active, email_verified, role, created_at, updated_at
     `, [role, id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
       });
     }
 
@@ -183,9 +185,9 @@ router.patch('/:id/role', async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating user role:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to update user role' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update user role'
     });
   }
 });
@@ -201,13 +203,13 @@ router.patch('/:id/toggle', async (req, res) => {
         is_active = NOT is_active,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $1
-      RETURNING id, email, username, first_name, last_name, is_active, is_verified, created_at, updated_at
+      RETURNING id, email, username, first_name, last_name, is_active, email_verified, created_at, updated_at
     `, [id]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
       });
     }
 
@@ -218,9 +220,9 @@ router.patch('/:id/toggle', async (req, res) => {
     });
   } catch (error) {
     console.error('Error toggling user status:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to update user status' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update user status'
     });
   }
 });
