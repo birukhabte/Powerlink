@@ -53,6 +53,30 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'PowerLink Ethiopia API Server',
+    status: 'running',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      test: '/api/test',
+      auth: '/api/auth',
+      announcements: '/api/announcements',
+      users: '/api/users',
+      outages: '/api/outages',
+      serviceRequests: '/api/service-requests',
+      uploads: '/api/uploads'
+    }
+  });
+});
+
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/announcements', require('./routes/announcements'));
@@ -63,9 +87,4 @@ app.use('/api/uploads', require('./routes/uploads'));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-// Health check endpoint for Render
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
