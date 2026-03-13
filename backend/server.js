@@ -64,3 +64,8 @@ app.use('/api/uploads', require('./routes/uploads'));
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
