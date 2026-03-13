@@ -7,13 +7,13 @@ async function createAdmin() {
     try {
         console.log('🔧 Creating admin user...\n');
 
-        // Admin credentials - CHANGE THESE!
+        // Admin credentials from environment variables
         const adminData = {
-            email: 'admin@powrlink',
-            username: 'admin',
-            password: '12345678', // ⚠️ CHANGE THIS PASSWORD!
-            firstName: 'System',
-            lastName: 'Administrator',
+            email: process.env.ADMIN_EMAIL || 'admin@example.com',
+            username: process.env.ADMIN_USERNAME || 'admin',
+            password: process.env.ADMIN_PASSWORD || 'defaultpassword',
+            firstName: process.env.ADMIN_FIRST_NAME || 'System',
+            lastName: process.env.ADMIN_LAST_NAME || 'Administrator',
             role: 'admin'
         };
 

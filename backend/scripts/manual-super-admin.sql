@@ -1,7 +1,8 @@
 -- Manual Super Admin Creation
 -- Run this SQL in your Supabase SQL Editor
+-- Replace the email and credentials with your actual values
 
--- First, let's create the super admin with a bcrypt hash for 'SuperAdmin123!'
+-- Create the super admin with environment-based credentials
 INSERT INTO users (
     email, 
     username, 
@@ -12,9 +13,9 @@ INSERT INTO users (
     is_active,
     email_verified
 ) VALUES (
-    'admin@system.com',
+    'admin@example.com',  -- Replace with your admin email
     'superadmin',
-    '$2a$10$rOvHq8K9yF8qGzJ5vN2.XeF8K7mP3nQ1wR4sT6uV9xY2zA3bC4dE6',  -- This is the hash for 'SuperAdmin123!'
+    '$2a$10$YourHashedPasswordWillBeHere',  -- Replace with actual hash
     'Super',
     'Admin',
     'admin',
@@ -28,7 +29,7 @@ INSERT INTO users (
     is_active = EXCLUDED.is_active,
     email_verified = EXCLUDED.email_verified;
 
--- Verify the user was created
+-- Verify the user was created (replace email)
 SELECT id, email, username, first_name, last_name, role, is_active, email_verified, created_at 
 FROM users 
-WHERE email = 'admin@system.com';
+WHERE email = 'admin@example.com';

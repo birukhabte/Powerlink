@@ -5,8 +5,8 @@ const pool = require('../config/database');
 
 async function resetPassword() {
     try {
-        const email = 'admin@powerlink.et';
-        const newPassword = 'admin123';
+        const email = process.env.ADMIN_EMAIL || 'admin@example.com';
+        const newPassword = process.env.ADMIN_PASSWORD || 'defaultpassword';
 
         console.log('\n🔐 Resetting admin password...\n');
 

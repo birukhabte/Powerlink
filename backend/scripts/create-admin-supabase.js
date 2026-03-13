@@ -14,7 +14,7 @@ async function removeAdmin() {
     try {
         console.log('\n�️  Removing admin user from Supabase...\n');
 
-        const adminEmail = 'admin@powerlink.et';
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
 
         // Check if admin exists
         const existing = await pool.query(

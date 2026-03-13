@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 
 async function hashPassword() {
-    const password = 'SuperAdmin123!';
+    const password = process.env.SUPER_ADMIN_PASSWORD || 'defaultpassword';
     const hash = await bcrypt.hash(password, 10);
-    console.log('Password hash for SuperAdmin123!:');
+    console.log('Password hash generated');
     console.log(hash);
     
     // SQL to insert the super admin
@@ -17,11 +17,11 @@ INSERT INTO users (
     last_name, 
     role
 ) VALUES (
-    'admin@system.com',
+    '${process.env.SUPER_ADMIN_EMAIL || 'admin@example.com'}',
     'superadmin',
     '${hash}',
-    'Super',
-    'Admin',
+    '${process.env.SUPER_ADMIN_FIRST_NAME || 'Super'}',
+    '${process.env.SUPER_ADMIN_LAST_NAME || 'Admin'}',
     'admin'
 ) ON CONFLICT (email) DO UPDATE SET
     password_hash = EXCLUDED.password_hash,

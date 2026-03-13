@@ -112,7 +112,7 @@ ORDER BY table_name;
 -- ============================================
 -- INSERT SAMPLE ADMIN USER
 -- ============================================
--- Password: admin123 (hashed with bcrypt)
+-- Sample admin user (replace with your actual credentials)
 INSERT INTO users (
     email, 
     username, 
@@ -121,7 +121,7 @@ INSERT INTO users (
     last_name, 
     role
 ) VALUES (
-    'admin@powerlink.et',
+    'admin@example.com',  -- Replace with your admin email
     'admin',
     '$2a$10$YourHashedPasswordWillBeHere',  -- You'll need to run create-admin script
     'System',
