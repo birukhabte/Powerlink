@@ -4,9 +4,11 @@ node_modules/
 
 # Environment files
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 *.local
+backend/.env
+frontend/**/.env
 
 # Build outputs
 dist/
