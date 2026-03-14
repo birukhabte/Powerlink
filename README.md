@@ -34,7 +34,7 @@ A digital platform for managing electricity services, outage reporting, and serv
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/birukhabte/Powerlink.git
    cd powerlink
    ```
 
